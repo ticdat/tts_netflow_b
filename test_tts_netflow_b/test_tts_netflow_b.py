@@ -23,7 +23,22 @@ def _nearly_same(x, y, epsilon=1e-5):
 class TestNetflow(unittest.TestCase):
     def test_standard_data_set(self):
         dat = get_test_data("sample_data.json")
-        tts_netflow_b.solve(dat) # just checking that no data integrity exceptions are thrown
+        sln = tts_netflow_b.solve(dat)
+        self.assertTrue(_nearly_same(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
+                                     5500.0, epsilon=1e-4))
+
+    def test_sloan_data_set(self):
+        # This data set was pulled from this MIT Sloan School of Management example problem here https://bit.ly/3254VpT
+        dat = get_test_data("sloan_data_set.json")
+        sln = tts_netflow_b.solve(dat)
+        self.assertTrue({row[:3]:row[-1] for row in sln.flow.itertuples(index=False)} ==
+            {(2, 3, 2): 2.0,
+             (2, 2, 5): 2.0,
+             (2, 5, 6): 2.0,
+             (1, 1, 2): 3.0,
+             (1, 2, 5): 3.0,
+             (1, 5, 4): 3.0,
+             (1, 1, 4): 2.0})
 
     def test_supply_demand_integrity(self):
         dat = get_test_data("sample_data.json")

@@ -1,8 +1,11 @@
 #
 # Core engine file for tts_netflow_b
 #
-
-from ticdat import PanDatFactory
+try:
+    import gurobipy as gp
+except:
+    gp = None
+from ticdat import PanDatFactory, Slicer
 
 # ------------------------ define the input schema --------------------------------
 input_schema = PanDatFactory (
@@ -113,9 +116,49 @@ def solve(dat):
     return solve_from_modeling_dat(create_modeling_dat_from_input_dat(dat))
 
 def solve_from_modeling_dat(dat):
+    """
+    auxiliary solving routine
+    :param dat: a good pan_dat for the modeling_schema
+    :return: a good pan_dat for the solution_schema, or None
+    """
     assert modeling_schema.good_pan_dat_object(dat), "bad dat check"
     assert not modeling_schema.find_duplicates(dat), "duplicate record check"
     assert not modeling_schema.find_foreign_key_failures(dat), "foreign key check"
-    # still need math functionality
+    assert not modeling_schema.find_data_type_failures(dat), "data type value check"
 
+    # Create optimization model
+    mdl = gp.Model('netflow')
+
+    # itertuples is the most performant way to iterate over the rows of a DataFrame
+    flow = {(h, i, j): mdl.addVar(name=f'flow_{h}_{i}_{j}', obj=cost)
+            for h, i, j, cost in dat.cost.itertuples(index=False)}
+
+    flowslice = Slicer(flow)
+    volume = {k: volume for k, volume in dat.commodities.itertuples(index=False)}
+
+    # Arc Capacity constraints
+    for i, j, capacity in dat.arcs.itertuples(index=False):
+        mdl.addConstr(gp.quicksum(flow[_h, _i, _j] * volume[_h]
+                                  for _h, _i, _j in flowslice.slice('*', i, j))
+                      <= capacity, name=f'cap_{i}_{j}')
+
+    inflow = {(h, j): qty for h, j, qty in dat.inflow.itertuples(index=False) if abs(qty) > 0}
+    # Flow conservation constraints. Constraints are generated only for relevant pairs.
+    # So we generate a conservation of flow constraint if there is negative or positive inflow
+    # quantity, or at least one inbound flow variable, or at least one outbound flow variable.
+    for h, j in set(inflow).union({(h, i) for h, i, j in flow}, {(h, j) for h, i, j in flow}):
+        mdl.addConstr(
+            gp.quicksum(flow[h_i_j] for h_i_j in flowslice.slice(h, '*', j)) +
+            inflow.get((h, j), 0) ==
+            gp.quicksum(flow[h_j_i] for h_j_i in flowslice.slice(h, j, '*')),
+            name=f'node_{h}_{j}')
+
+    # Compute optimal solution
+    mdl.optimize()
+
+    if mdl.status == gp.GRB.status.OPTIMAL:
+        # PanDatFactory also makes it easy to create DataFrame objects from rows of data
+        rtn = solution_schema.PanDat(flow=[[h, i, j, var.x] for (h, i, j), var in flow.items() if var.x > 0],
+                                     parameters=[["Total Cost",  mdl.objVal]])
+        return rtn
 # ---------------------------------------------------------------------------------
