@@ -25,6 +25,18 @@ class TestNetflow(unittest.TestCase):
         dat = get_test_data("sample_data.json")
         tts_netflow_b.solve(dat) # just checking that no data integrity exceptions are thrown
 
+    def test_supply_demand_integrity(self):
+        dat = get_test_data("sample_data.json")
+        dat.supply = dat.supply.append(dat.demand[-2:-1], sort=False) # add the last row of demand to supply
+        ex = []
+        try:
+            tts_netflow_b.solve(dat)
+        except AssertionError as e: # safe to assume unit tests aren't run with asserts disabled
+            ex.append(e)
+        self.assertTrue(ex and 'data row check' == str(ex[0]))
+        # both supply and demand should have a data row problem
+        self.assertTrue(set(map(tuple, tts_netflow_b.input_schema.find_data_row_failures(dat))) ==
+                        {('demand', 'Check Demand Against Supply'), ('supply', 'Check Supply Against Demand')})
 
 # Run the tests via the command line
 if __name__ == "__main__":
