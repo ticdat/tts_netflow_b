@@ -115,56 +115,36 @@
       40.0
     ]
   ],
-  "inflow": [
+  "demand": [
     [
       "Pens",
       "Boston",
-      -40.0
+      40.0
     ],
     [
       "Pens",
       "New York",
-      -30.0
+      30.0
     ],
     [
       "Pencils",
-      "Detroit",
+      "Seattle",
+      10.0
+    ],
+    [
+      "Pens",
+      "Seattle",
+      30.0
+    ],
+    [
+      "Pencils",
+      "New York",
       50.0
     ],
     [
       "Pencils",
-      "Seattle",
-      -10.0
-    ],
-    [
-      "Pencils",
-      "Denver",
-      60.0
-    ],
-    [
-      "Pens",
-      "Detroit",
-      60.0
-    ],
-    [
-      "Pens",
-      "Seattle",
-      -30.0
-    ],
-    [
-      "Pens",
-      "Denver",
-      40.0
-    ],
-    [
-      "Pencils",
-      "New York",
-      -50.0
-    ],
-    [
-      "Pencils",
       "Boston",
-      -50.0
+      50.0
     ]
   ],
   "nodes": [
@@ -182,6 +162,28 @@
     ],
     [
       "Detroit"
+    ]
+  ],
+  "supply": [
+    [
+      "Pencils",
+      "Detroit",
+      50.0
+    ],
+    [
+      "Pencils",
+      "Denver",
+      60.0
+    ],
+    [
+      "Pens",
+      "Detroit",
+      60.0
+    ],
+    [
+      "Pens",
+      "Denver",
+      40.0
     ]
   ]
 }
