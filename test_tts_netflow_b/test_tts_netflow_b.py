@@ -26,7 +26,12 @@ class TestNetflow(unittest.TestCase):
         sln = tts_netflow_b.solve(dat)
         self.assertTrue(_nearly_same(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
                                      5500.0, epsilon=1e-4))
-
+        # simple demo of editing the dat object to validate a related solve
+        dat.cost.loc[(dat.cost["Commodity"] == "Pencils") & (dat.cost["Source"] == "Denver") &
+                     (dat.cost["Destination"] == "Seattle"), "Cost"] = 300
+        sln = tts_netflow_b.solve(dat)
+        self.assertTrue(_nearly_same(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
+                                     6100.0, epsilon=1e-4))
     def test_sloan_data_set(self):
         # This data set was pulled from this MIT Sloan School of Management example problem here https://bit.ly/3254VpT
         dat = get_test_data("sloan_data_set.json")
