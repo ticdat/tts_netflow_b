@@ -1,4 +1,11 @@
-# tts_netflow_b
+### tts_netflow_b
+
+Usage:
+
+```
+    python -m tts_netflow_b -i input.xlsx -o solution.xlsx
+```
+
 Multi-commodity network flow Tidy, Tested, Safe demonstration repository.
 
 We demonstrate the Agile development process with three releases that advance functionality or fix bugs.
