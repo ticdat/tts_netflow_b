@@ -7,6 +7,7 @@ except:
     gp = None
 from ticdat import PanDatFactory, Slicer
 
+from tts_netflow_b.tooltips import input_schema_tooltips, solution_schema_tooltips
 # ------------------------ define the input schema --------------------------------
 input_schema = PanDatFactory (
     commodities=[["Name"], ["Volume"]],
@@ -16,6 +17,8 @@ input_schema = PanDatFactory (
     supply=[["Commodity", "Node"], ["Quantity"]],
     demand=[["Commodity", "Node"], ["Quantity"]]
 )
+for (tbl, fld), tip in input_schema_tooltips.items():
+    input_schema.set_tooltip(tbl, fld, tip)
 
 # Define the foreign key relationships
 input_schema.add_foreign_key("arcs", "nodes", ['Source', 'Name'])
@@ -65,24 +68,19 @@ input_schema.add_data_row_predicate("supply", predicate_name="Check Supply Again
 solution_schema = PanDatFactory(
         flow=[["Commodity", "Source", "Destination"], ["Quantity"]],
         parameters=[["Parameter"], ["Value"]])
+for (tbl, fld), tip in solution_schema_tooltips.items():
+    solution_schema.set_tooltip(tbl, fld, tip)
 # ---------------------------------------------------------------------------------
 
 # ------------------------ solving section-----------------------------------------
 # Since the modeling_schema is so similar to the input_schema, we'll create it using clone
 # If you find this too fancy, you could also write out a full description of modeling_schema
 # as you do with input_schema
-
-def _add_inflow_table(full_schema_dict):
-    # as per the clone docstring, this function will take a full_schema_dict as argument and
-    # return the  PanDatFactory we want to make.. in this case, all we need to do is add inflow.
-    full_schema_dict["tables_fields"]["inflow"] = [["Commodity", "Node"], ["Quantity"]]
-    rtn = PanDatFactory.create_from_full_schema(full_schema_dict)
-    return rtn
-
 modeling_schema = input_schema.clone(
     # we're going to remove the supply and demand tables before passing along to clone_factory
-    table_restrictions=set(input_schema.all_tables).difference({"supply", "demand"}),
-    clone_factory=_add_inflow_table)
+    table_restrictions=set(input_schema.all_tables).difference({"supply", "demand"})).\
+    clone_add_a_table("inflow", ["Commodity", "Node"], ["Quantity"])
+
 
 # clone copied over all the integrity rules other than those associated with supply, demand
 # so all thats left is to add the inflow integrity rules
