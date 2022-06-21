@@ -2,7 +2,7 @@ import os
 import inspect
 import tts_netflow_b
 import unittest
-import collections
+import math
 
 def _this_directory() :
     return os.path.dirname(os.path.realpath(os.path.abspath(inspect.getsourcefile(_this_directory))))
@@ -14,24 +14,18 @@ def get_test_data(data_set_name):
     if os.path.isfile(path):
         return tts_netflow_b.input_schema.json.create_pan_dat(path)
 
-def _nearly_same(x, y, epsilon=1e-5):
-    if x == y or max(abs(x), abs(y)) < epsilon:
-        return True
-    if min(abs(x), abs(y)) > epsilon:
-        return abs(x-y) /  min(abs(x), abs(y)) < epsilon
-
 class TestNetflow(unittest.TestCase):
     def test_standard_data_set(self):
         dat = get_test_data("sample_data.json")
         sln = tts_netflow_b.solve(dat)
-        self.assertTrue(_nearly_same(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
-                                     5500.0, epsilon=1e-4))
+        self.assertTrue(math.isclose(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
+                                     5500.0, rel_tol=1e-4))
         # simple demo of editing the dat object to validate a related solve
         dat.cost.loc[(dat.cost["Commodity"] == "Pencils") & (dat.cost["Source"] == "Denver") &
                      (dat.cost["Destination"] == "Seattle"), "Cost"] = 300
         sln = tts_netflow_b.solve(dat)
-        self.assertTrue(_nearly_same(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
-                                     6100.0, epsilon=1e-4))
+        self.assertTrue(math.isclose(list(sln.parameters[sln.parameters["Parameter"] == "Total Cost"]["Value"])[0],
+                                     6100.0, rel_tol=1e-4))
     def test_sloan_data_set(self):
         # This data set was pulled from this MIT Sloan School of Management example problem here https://bit.ly/3254VpT
         dat = get_test_data("sloan_data_set.json")
