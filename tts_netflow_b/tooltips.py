@@ -1,10 +1,10 @@
 # To minimize distraction from the logical code in netflow.py, I'm putting the tooltips in this file.
 # The tooltips are completely optional but they make the schemas more comprehensible.
 input_schema_tooltips = {
-    ("commodities", ""): "Definte the commodities.",
+    ("commodities", ""): "Define the commodities.",
     ("commodities", "Name"): "The name of the commodity.",
-    ("commodities", "Volume"): "The volumne for one unit of this commodity.",
-    ("nodes", ""): "Definte the nodes.",
+    ("commodities", "Volume"): "The volume for one unit of this commodity.",
+    ("nodes", ""): "Define the nodes.",
     ("nodes", "Name"): "The name of the node.",
     ("arcs", ""): "Populate the arcs table as a pre-requisite to populating the cost table.",
     ("arcs", "Source"): "The source node for the arc.",
