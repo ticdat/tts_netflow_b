@@ -6,6 +6,7 @@ try:
 except:
     gp = None
 from ticdat import PanDatFactory, Slicer
+import pandas as pd
 
 from tts_netflow_b.tooltips import input_schema_tooltips, solution_schema_tooltips
 # ------------------------ define the input schema --------------------------------
@@ -104,7 +105,7 @@ def create_modeling_dat_from_input_dat(dat):
                                  inflow=dat.supply)
     df = dat.demand.copy()
     df["Quantity"] = -df["Quantity"]
-    rtn.inflow = rtn.inflow.append(df, sort=False)
+    rtn.inflow = pd.concat([rtn.inflow, df], ignore_index=True)
     return rtn
 
 def solve(dat):

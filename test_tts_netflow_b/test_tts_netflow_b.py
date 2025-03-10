@@ -3,6 +3,7 @@ import inspect
 import tts_netflow_b
 import unittest
 import math
+import pandas as pd
 
 def _this_directory() :
     return os.path.dirname(os.path.realpath(os.path.abspath(inspect.getsourcefile(_this_directory))))
@@ -41,7 +42,7 @@ class TestNetflow(unittest.TestCase):
 
     def test_supply_demand_integrity(self):
         dat = get_test_data("sample_data.json")
-        dat.supply = dat.supply.append(dat.demand[-2:-1], sort=False) # add the last row of demand to supply
+        dat.supply = pd.concat([dat.supply, dat.demand[-2:-1]], ignore_index=True)
         ex = []
         try:
             tts_netflow_b.solve(dat)
