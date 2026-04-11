@@ -44,9 +44,10 @@ input_schema.set_data_type("demand", "Quantity", min=0, max=float("inf"), inclus
 input_schema.set_data_type("supply", "Quantity", min=0, max=float("inf"), inclusive_min=True,
                                        inclusive_max=False)
 
-# The default-default of zero makes sense everywhere except for Capacity
+# The default-default of zero makes sense everywhere except for Capacity, Volume
 input_schema.set_default_value("arcs", "Capacity", float("inf"))
-# since infinity is natural for this model, lets handle infinity gracefully with a cloud GUI like Roundoff
+input_schema.set_default_value("commodities", "Volume", 1)
+# since infinity is natural for this model, lets handle infinity gracefully with a cloud GUI platform like Foresta
 input_schema.set_infinity_io_flag(999999999)
 
 # we check that the same commodity node pairs don't appear both in supply and demand
